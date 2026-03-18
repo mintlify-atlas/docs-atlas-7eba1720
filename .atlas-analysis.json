@@ -1,0 +1,86 @@
+{
+  "projectType": "general",
+  "projectName": "Tododeia — Multi-Agent Investment Analysis Skill",
+  "projectDescription": "A Claude Code skill that spawns 5 specialized AI research agents to analyze investment opportunities across crypto, stocks, forex, and commodities, adapting to your risk profile and generating an interactive bilingual dashboard.",
+  "theme": "almond",
+  "primaryColor": "#c87532",
+  "lightColor": "#323865",
+  "darkColor": "#c5c6d0",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["introduction", "quickstart", "installation"]
+          },
+          {
+            "group": "How It Works",
+            "pages": [
+              "how-it-works/overview",
+              "how-it-works/agent-workflow",
+              "how-it-works/risk-profiles",
+              "how-it-works/sectors"
+            ]
+          },
+          {
+            "group": "Dashboard",
+            "pages": [
+              "dashboard/overview",
+              "dashboard/language-toggle",
+              "dashboard/charts-and-data",
+              "dashboard/historical-accuracy"
+            ]
+          },
+          {
+            "group": "Customization",
+            "pages": [
+              "customization/agent-prompts",
+              "customization/risk-profiles",
+              "customization/dashboard-styling",
+              "customization/translations"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "reference/scheduling",
+              "reference/fallback-mode",
+              "reference/data-schema",
+              "reference/faq"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "5 specialized AI agents (4 sector researchers + 1 strategy synthesizer) running in parallel",
+    "Dynamic asset discovery — agents find the most relevant assets based on current market conditions",
+    "Risk profile adaptation (conservative, moderate, aggressive) affecting recommendations and allocations",
+    "Social sentiment analysis from Twitter/X and Reddit per asset",
+    "Source cross-referencing with price agreement scoring from 2+ sources",
+    "Historical accuracy tracking comparing past recommendations to actual outcomes",
+    "Portfolio allocation with suggested % by sector based on risk profile",
+    "Cross-sector correlation insights identifying patterns individual agents cannot see",
+    "Full Spanish/English bilingual support for both UI and report data",
+    "Interactive Next.js dashboard with charts, expandable sector panels, and risk warnings",
+    "Fallback HTML report via Python HTTP server when Node.js is unavailable",
+    "Scheduling support for daily or weekly automated reports"
+  ],
+  "publicApiSurface": [
+    "SKILL.md — Orchestrator workflow definition (10-step investment analysis pipeline)",
+    "references/agent-prompts.md — Prompts for all 5 agents (Crypto, Stocks, Currencies, Materials, Strategy)",
+    "dashboard/public/data/report.json — Generated English report JSON output",
+    "dashboard/public/data/report-es.json — Generated Spanish report JSON output",
+    "output/history/YYYY-MM-DD.json — Historical report archive",
+    "install.sh — One-liner installation script",
+    "ReportData TypeScript interface — Full report data schema",
+    "Asset TypeScript interface — Per-asset data structure",
+    "SectorData TypeScript interface — Per-sector output structure",
+    "RiskAdjustedPick TypeScript interface — Strategy agent pick schema",
+    "Trigger phrases: 'investment analysis', 'analyze markets', 'market report', 'run tododeia'",
+    "Risk profiles: conservative | moderate | aggressive"
+  ]
+}
