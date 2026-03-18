@@ -1,0 +1,49 @@
+---
+title: "Dashboard overview"
+description: The interactive Next.js dashboard that displays your investment analysis, served locally at http://localhost:3420.
+---
+
+The Tododeia dashboard is a Next.js application that renders your investment report as an interactive, multi-section page. After each analysis run, the skill writes the report data to `dashboard/public/data/report.json` and starts the dev server. Open **http://localhost:3420** in your browser to view the report.
+
+The dashboard reads data from the JSON file at startup, so you can refresh the page at any time to reload the latest report without restarting the server.
+
+## Dashboard sections
+
+<CardGroup cols={2}>
+  <Card title="Executive summary" icon="file-text">
+    A 3–4 sentence strategy overview produced by the Strategy Agent, tailored to your chosen risk profile. Sets the tone for the entire report.
+  </Card>
+  <Card title="Portfolio allocation chart" icon="pie-chart">
+    A visual breakdown of the recommended percentage allocation across crypto, stocks, currencies, commodities, and cash. Percentages adapt to your risk profile.
+  </Card>
+  <Card title="Risk-adjusted top picks" icon="trophy">
+    A ranked grid of the best assets across all sectors. Each card shows the confidence score, risk score, risk-adjusted score, recommendation, and suggested position size.
+  </Card>
+  <Card title="Cross-sector insights" icon="git-merge">
+    Observations about correlations and divergences between markets that individual sector agents cannot see on their own — for example, an unusual co-movement between gold and crypto.
+  </Card>
+  <Card title="Expandable sector panels" icon="layers">
+    Collapsible panels for Cryptocurrency, Stock Market, Forex & Currencies, and Commodities & Materials. Each panel shows a sector summary, outlook, top pick, and a full per-asset data table.
+  </Card>
+  <Card title="Charts" icon="bar-chart-2">
+    Interactive Recharts visualizations including portfolio allocation breakdown, sector confidence, social buzz, and a risk vs. adjusted-score scatter plot.
+  </Card>
+  <Card title="Historical accuracy" icon="clock">
+    Tracks how previous buy/sell calls performed against actual price movements. Displays accuracy percentage, total calls made, correct calls, and notable examples.
+  </Card>
+  <Card title="Risk warnings" icon="alert-triangle">
+    Any concerns raised by the Strategy Agent appear here — for example, elevated geopolitical risk or high correlation between asset classes that normally move independently.
+  </Card>
+</CardGroup>
+
+## Language toggle
+
+When you open the dashboard for the first time, a language picker asks you to choose between English and Spanish. You can switch languages at any time using the **Language** control in the toolbar. See [Language toggle](/dashboard/language-toggle) for details on what translates and what stays as-is.
+
+## Fallback mode
+
+If Node.js is not available on your machine, the skill falls back to generating a standalone `output/report.html` file from an HTML template. This file is served by Python's built-in HTTP server on port **8420**. Open `http://localhost:8420/report.html` to view the report in fallback mode.
+
+<Note>
+  The fallback HTML report does not support the language toggle or interactive charts. It is a static snapshot of the analysis.
+</Note>

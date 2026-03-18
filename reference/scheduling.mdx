@@ -1,0 +1,72 @@
+---
+title: 'Scheduling reports'
+description: 'Set up daily or weekly automated investment analysis with Claude Code loops.'
+---
+
+Tododeia runs on demand by default. After your first report, you can optionally schedule it to run automatically on a fixed interval using Claude Code's `/loop` command.
+
+<Note>
+  Tododeia never caches data. Every run — whether manual or scheduled — performs fresh live web research across all four sector agents.
+</Note>
+
+## The /loop command
+
+Claude Code's `/loop` command re-runs a slash command at a fixed interval. Pass the interval as a duration followed by the command name:
+
+```
+/loop <interval> <command>
+```
+
+## Scheduling options
+
+### Daily reports
+
+Re-runs the investment analysis every 24 hours:
+
+```
+/loop 24h /investment-analysis
+```
+
+### Weekly reports
+
+Re-runs the investment analysis every 168 hours (7 days):
+
+```
+/loop 168h /investment-analysis
+```
+
+<Tip>
+  You can also trigger a report manually at any time by using one of the trigger phrases: "run investment analysis", "analyze the markets", "run tododeia", or any other phrase from the skill's trigger list.
+</Tip>
+
+## What happens on each run
+
+Every scheduled (or manual) run follows the same full workflow:
+
+<Steps>
+  <Step title="Risk profile">
+    You are asked for your risk tolerance if this is the first run. On subsequent runs in the same session, your previous selection may be reused.
+  </Step>
+  <Step title="Live web research">
+    All four sector agents (crypto, stocks, currencies, materials) run in parallel and fetch fresh data from the web. No previous data is reused.
+  </Step>
+  <Step title="Strategy synthesis">
+    The strategy agent receives all four sector outputs plus your risk profile and any historical data, then produces cross-sector analysis and risk-adjusted picks.
+  </Step>
+  <Step title="Report written">
+    The combined output is serialized and written to **`dashboard/public/data/report.json`** (English) and **`dashboard/public/data/report-es.json`** (Spanish).
+  </Step>
+  <Step title="History saved">
+    The report is also saved to **`output/history/YYYY-MM-DD.json`** for historical accuracy tracking. The last 30 report files are kept; older files are deleted automatically.
+  </Step>
+  <Step title="Dashboard updates">
+    The Next.js dashboard at **http://localhost:3420** picks up the new `report.json` automatically. Refresh the page to see the latest data.
+  </Step>
+</Steps>
+
+## Important notes
+
+- Scheduling is **optional** and must be set up manually — Tododeia will suggest it after your first report but never auto-configures it.
+- The dashboard server stays running at **http://localhost:3420** between runs. You do not need to restart it.
+- Each run produces a new dated history file. Historical accuracy improves as more runs accumulate.
+- To stop a loop, end the Claude Code session or cancel the loop from within Claude Code.

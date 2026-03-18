@@ -1,0 +1,139 @@
+---
+title: "Overview"
+description: "How Tododeia's multi-agent pipeline works end to end"
+---
+
+Tododeia runs a 10-step orchestrated pipeline every time you trigger an analysis. A single orchestrator coordinates 5 specialized AI agents, adapts everything to your risk tolerance, and delivers an interactive bilingual dashboard — all from one command.
+
+## Pipeline architecture
+
+```text
+                         ┌──────────────┐
+                    ┌────┤  You trigger  ├────┐
+                    │    │  "analyze     │    │
+                    │    │   markets"    │    │
+                    │    └──────────────┘    │
+                    ▼                        ▼
+            ┌──────────────┐        ┌──────────────┐
+            │ Risk Profile │        │ Load History  │
+            │   Question   │        │  (if exists)  │
+            └──────┬───────┘        └──────┬───────┘
+                   │                       │
+                   ▼                       │
+    ┌──────────────────────────────┐       │
+    │     4 Sector Agents          │       │
+    │  (parallel web research)     │       │
+    │                              │       │
+    │  ┌───────┐  ┌───────┐       │       │
+    │  │Crypto │  │Stocks │       │       │
+    │  └───────┘  └───────┘       │       │
+    │  ┌───────┐  ┌──────────┐   │       │
+    │  │ Forex │  │Materials │   │       │
+    │  └───────┘  └──────────┘   │       │
+    └──────────────┬───────────────┘       │
+                   │                       │
+                   ▼                       ▼
+          ┌────────────────────────────────────┐
+          │        Strategy Agent               │
+          │  (cross-sector analysis,            │
+          │   risk-adjusted ranking,            │
+          │   portfolio allocation,             │
+          │   historical accuracy check)        │
+          └────────────────┬───────────────────┘
+                           │
+                    ┌──────┴──────┐
+                    ▼             ▼
+            ┌────────────┐ ┌────────────┐
+            │ report.json│ │report-es   │
+            │ (English)  │ │  .json     │
+            └──────┬─────┘ └──────┬─────┘
+                   │              │
+                   ▼              ▼
+              ┌──────────────────────┐
+              │   Next.js Dashboard  │
+              │   localhost:3420     │
+              │   EN / ES toggle    │
+              └──────────────────────┘
+```
+
+## The 10 steps
+
+<Steps>
+  <Step title="Determine risk profile">
+    Before any research begins, the orchestrator asks you to choose a risk profile: **Conservative**, **Moderate**, or **Aggressive**. This single input shapes every downstream decision — which assets to emphasize, how to score them, what position sizes to suggest, and how to allocate across sectors.
+
+    Your answer is stored as the `risk_profile` variable and passed to the Strategy Agent in step 5.
+  </Step>
+
+  <Step title="Load agent prompts">
+    The orchestrator reads the agent prompt templates from `references/agent-prompts.md`. These templates define how each of the 5 agents searches, what sources they prioritize, and what JSON schema they must return.
+  </Step>
+
+  <Step title="Load historical data">
+    The orchestrator checks `output/history/` for previous report files (named `YYYY-MM-DD.json`). If a prior report exists, the most recent one is loaded and passed to the Strategy Agent. This enables historical accuracy tracking — comparing past buy/sell calls to where prices ended up.
+
+    If no history exists, the pipeline continues normally; this is treated as a first run.
+  </Step>
+
+  <Step title="Spawn 4 sector agents in parallel">
+    All 4 sector agents launch simultaneously. Each agent performs live web research using `WebSearch` and `WebFetch`, then returns a structured JSON report. Running them in parallel means the entire research phase takes roughly as long as the slowest single agent, not all four combined.
+
+    The 4 agents are: Crypto, Stocks, Currencies, and Materials. See [Agent workflow](/how-it-works/agent-workflow) for details on each.
+  </Step>
+
+  <Step title="Spawn the Strategy Agent">
+    Once all 4 sector reports are in, the Strategy Agent receives them together with your risk profile and any historical data. It performs cross-sector correlation analysis, scores every asset on a risk-adjusted basis, recommends a portfolio allocation, and checks historical accuracy.
+
+    The Strategy Agent is the brain of the system — it connects patterns that individual sector agents cannot see.
+  </Step>
+
+  <Step title="Build the report data">
+    The orchestrator merges all agent outputs into a single `REPORT_DATA` object. This object contains the macro environment assessment, portfolio allocation, cross-sector insights, risk-adjusted top picks, historical accuracy, sector-level data, and per-asset detail.
+  </Step>
+
+  <Step title="Save historical data">
+    The `REPORT_DATA` is saved to `output/history/YYYY-MM-DD.json` so future runs can track accuracy. The pipeline retains only the last 30 report files, deleting older ones automatically.
+  </Step>
+
+  <Step title="Generate and translate the report">
+    **Primary path:** The report JSON is written to `dashboard/public/data/report.json` for the Next.js dashboard.
+
+    **Translation:** A Translation Agent then creates `report-es.json` — a Spanish version of all human-readable text fields. Numbers, tickers, prices, percentages, and enum values (like `"bullish"` or `"buy"`) are left unchanged.
+
+    **Fallback path:** If Node.js is unavailable, the orchestrator populates a standalone `output/report.html` file instead, served via Python's built-in HTTP server.
+  </Step>
+
+  <Step title="Serve the report">
+    The Next.js dashboard starts on port 3420 (if not already running) and you receive a summary message:
+
+    > **Tododeia Investment Report is ready!**
+    > Open: http://localhost:3420
+    >
+    > **Profile**: \{risk_profile\} | **Top Pick**: \{#1 risk-adjusted pick\} | **Portfolio**: \{allocation summary\}
+
+    The dashboard includes charts, expandable sector panels, top picks with confidence scores, cross-sector insights, historical accuracy tracking, and a full English/Spanish language toggle.
+  </Step>
+
+  <Step title="Offer scheduling">
+    After delivering the report URL, the orchestrator offers to set up automatic recurring analysis:
+
+    - `/loop 24h /investment-analysis` — daily reports
+    - `/loop 168h /investment-analysis` — weekly reports
+
+    Scheduling is never set up automatically — it's presented as an option for you to accept or ignore.
+  </Step>
+</Steps>
+
+## What makes this pipeline different
+
+**Dynamic asset discovery.** Sector agents don't follow a fixed ticker list. They search the web to find the most relevant assets for current market conditions, then research those dynamically discovered assets.
+
+**Parallelism.** The 4 sector agents run simultaneously. The Strategy Agent runs only after all 4 complete, so it always has the full picture.
+
+**Risk profile as a first-class input.** Your risk tolerance is captured before a single search query runs. It influences asset scoring, position sizing, and allocation percentages throughout the entire pipeline.
+
+**Accuracy over time.** Every report is archived. Future runs compare previous recommendations to current prices, giving you a running track record of the system's calls.
+
+<Note>
+  Tododeia is for informational and educational purposes only. It does not constitute financial advice. Always consult a qualified financial advisor before making investment decisions.
+</Note>

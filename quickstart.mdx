@@ -1,80 +1,95 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: 'Quickstart'
+description: 'Getting your first investment analysis running in minutes.'
 ---
 
-## Get started in three steps
+Tododeia spawns 5 specialized AI agents to research crypto, stocks, forex, and commodities in parallel, then serves the results as an interactive dashboard at `http://localhost:3420`. This guide shows the fastest path from install to report.
 
-Get your documentation site running locally and make your first customization.
+<Warning>
+  Tododeia is for informational and educational purposes only. It does not constitute financial advice. Always consult a qualified financial advisor before making investment decisions.
+</Warning>
 
-### Step 1: Set up your local environment
+## Before you start
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+Make sure you have:
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI installed
+- Node.js 18+ (for the interactive dashboard)
+- An active internet connection (agents perform live web research)
 
-### Step 2: Deploy your changes
+## Run your first analysis
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+<Steps>
+  <Step title="Install Tododeia">
+    Run the one-liner installer in your terminal:
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+    ```bash
+    curl -sL https://raw.githubusercontent.com/Hainrixz/maia-skill/main/install.sh | bash
+    ```
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+    The script clones the repository, symlinks the skill into Claude Code, and installs dashboard dependencies automatically.
+  </Step>
 
-### Step 3: Go live
+  <Step title="Open Claude Code and trigger an analysis">
+    In any Claude Code conversation, use one of these trigger phrases:
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+    - `Run an investment analysis`
+    - `What are the best investment opportunities today?`
+    - `Analyze the markets`
+    - `Give me a market report`
+    - `Run tododeia`
 
-## Next steps
+    The skill activates automatically when you mention investment-related topics.
+  </Step>
 
-Now that you have your docs running, explore these key features:
+  <Step title="Choose your risk profile">
+    Claude will ask for your risk tolerance before any research begins. Pick the profile that matches your goals:
 
-<CardGroup cols={2}>
+    | Profile | Description |
+    |---|---|
+    | **Conservative** | Capital preservation, stable returns, lower risk (bonds, blue chips, gold) |
+    | **Moderate** | Balanced growth and safety, diversified across sectors *(Recommended)* |
+    | **Aggressive** | Maximum growth potential, comfortable with high volatility (crypto, growth stocks, leveraged positions) |
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
+    Your selection shapes every recommendation: which assets are emphasized, position sizes, and portfolio allocation percentages.
+  </Step>
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
+  <Step title="Wait for the 5 agents to finish">
+    Once you confirm your risk profile, Tododeia launches all agents:
 
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
+    - **4 sector agents** run in parallel, each researching crypto, stocks, forex, and commodities using live web data
+    - **1 strategy agent** synthesizes all sector findings into a cross-sector analysis, risk-adjusted rankings, and portfolio allocation
 
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
+    This typically takes 1–3 minutes depending on your connection speed.
+  </Step>
 
-</CardGroup>
+  <Step title="View your dashboard">
+    When the analysis is complete, open your browser and navigate to:
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+    ```
+    http://localhost:3420
+    ```
+
+    You'll see:
+    - An **executive summary** with macro environment assessment
+    - A **portfolio allocation** chart with recommended percentages per sector
+    - **Risk-adjusted top picks** with confidence scores and suggested position sizes
+    - **Cross-sector insights** highlighting correlations between markets
+    - **Expandable sector panels** with detailed per-asset analysis
+    - **Historical accuracy** tracking past recommendation performance
+
+    Use the language toggle in the **toolbar** to switch between English and Spanish at any time.
+  </Step>
+</Steps>
+
+## Set up recurring reports (optional)
+
+After your first report, you can schedule automatic analysis:
+
+```
+/loop 24h /investment-analysis    # Daily reports
+/loop 168h /investment-analysis   # Weekly reports
+```
+
+<Tip>
+  Tododeia never caches data. Every invocation runs fresh web research across all sectors.
+</Tip>

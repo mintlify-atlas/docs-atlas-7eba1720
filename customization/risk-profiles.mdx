@@ -1,0 +1,99 @@
+---
+title: "Customizing risk profiles"
+description: "How to adjust how each risk profile affects scoring, allocation, and position sizing."
+---
+
+The three risk profiles — conservative, moderate, and aggressive — are defined in the **Strategy Agent** section of **`references/agent-prompts.md`**. The profile is selected by the user at the start of each run, stored as the `risk_profile` variable, and passed to the Strategy Agent, which applies the matching scoring rules.
+
+## Scoring modifiers
+
+In Step 3 of the Strategy Agent prompt ("Risk-Adjusted Ranking"), each profile defines numeric modifiers applied to every asset's base score before the agent produces its ranked picks.
+
+<Tabs>
+  <Tab title="Conservative">
+    **Goal**: Capital preservation, stable returns.
+
+    ```
+    - Penalize high-volatility assets: crypto -3, growth stocks -2
+    - Boost stable assets: gold +2, blue chips +1, bonds-equivalent currencies +1
+    - Maximum 5% allocation to any single high-risk asset
+    - Favor hold/accumulate over aggressive buy
+    ```
+
+    **To customize:**
+    - Change the `-3` crypto penalty to `-2` if you want the conservative profile to allow slightly more crypto exposure.
+    - Add new stable-asset boosts (e.g., `dividend stocks +1`) by appending a line in the same format.
+    - Lower the 5% single-position cap to make the profile even more restrictive.
+  </Tab>
+
+  <Tab title="Moderate">
+    **Goal**: Balanced growth and safety. This is the recommended default.
+
+    ```
+    - Slight volatility penalty for crypto: -1
+    - Balance between growth and stability
+    - Maximum 10% allocation to any single asset
+    - Standard buy/hold/sell thresholds
+    ```
+
+    **To customize:**
+    - Remove the `-1` crypto penalty if you want crypto to compete on equal footing with other assets.
+    - Raise the 10% single-position cap to allow slightly more concentration.
+    - Add a growth-stock boost (e.g., `high-earnings-growth stocks +1`) to tilt growth.
+  </Tab>
+
+  <Tab title="Aggressive">
+    **Goal**: Maximum growth potential, high volatility tolerance.
+
+    ```
+    - Boost high-momentum assets: +2 for trending up
+    - Allow concentrated positions: up to 20% in a single asset
+    - Favor assets with high social buzz and momentum
+    - Willing to buy into dips with strong fundamental thesis
+    ```
+
+    **To customize:**
+    - Increase the momentum boost to `+3` for an even more momentum-driven strategy.
+    - Raise the 20% cap further if you want to allow very concentrated bets.
+    - Add language like "leverage ETFs allowed" if your use case supports it.
+  </Tab>
+</Tabs>
+
+## Portfolio allocation defaults
+
+Step 4 of the Strategy Agent prompt instructs it to produce a portfolio allocation that totals 100%. The example output in the prompt uses these moderate-profile defaults:
+
+```json
+{
+  "portfolio_allocation": {
+    "crypto": 10,
+    "stocks": 45,
+    "currencies": 15,
+    "materials": 20,
+    "cash": 10
+  }
+}
+```
+
+The Strategy Agent calculates its own allocation based on current market conditions and the risk profile — the values above are illustrative, not hard-coded limits. To constrain allocations within tighter bands, add explicit range instructions to the prompt, for example:
+
+```
+For moderate profile:
+  - Crypto: 5–15%
+  - Stocks: 35–55%
+  - Currencies: 10–20%
+  - Materials: 10–25%
+  - Cash: 5–15%
+```
+
+Add equivalent range lines for conservative and aggressive profiles to give the agent clear guardrails.
+
+## What else you can customize per profile
+
+- **Recommendation bias** — The conservative profile currently favors "hold/accumulate over aggressive buy". Change this to "avoid buy entirely unless confidence ≥ 8" for an even more cautious stance.
+- **Cross-sector correlation reactions** — You can add profile-specific instructions for how the agent should react to correlation signals. For example: "For conservative profile: if crypto and stocks are both down, increase cash to minimum 20%."
+- **Confidence thresholds** — Add a line like "For conservative profile, only include picks with confidence ≥ 7" to filter out lower-conviction calls.
+
+<Warning>
+The three profile names — `conservative`, `moderate`, and `aggressive` — are enum values used in the JSON output schema, the dashboard's display logic, and the history files. Do not rename them. If you need a fourth profile, add it as a new option in both the SKILL.md Step 1 prompt question and the Strategy Agent scoring section, and update the TypeScript types in the dashboard.
+</Warning>

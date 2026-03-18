@@ -1,0 +1,122 @@
+---
+title: 'FAQ'
+description: 'Frequently asked questions about Tododeia.'
+---
+
+<AccordionGroup>
+  <Accordion title="Is this financial advice?">
+    No. Tododeia is for **informational and educational purposes only**. It does not constitute financial advice, investment recommendations, or solicitation to buy or sell any securities, cryptocurrencies, or commodities.
+
+    AI-generated analysis may contain errors and should not be relied upon for investment decisions. Always consult a qualified financial advisor before making investment decisions. Past performance is not indicative of future results. Tododeia and its creators assume no liability for investment losses.
+  </Accordion>
+
+  <Accordion title="How fresh is the data?">
+    Every run performs **live web research** — there is no caching of prices, news, or sentiment data. Each of the four sector agents independently fetches current market data from the web using `WebSearch` and `WebFetch`.
+
+    This means results can vary between runs even if you run the analysis twice in the same hour, because market conditions and news change continuously.
+  </Accordion>
+
+  <Accordion title="What if an agent can't find data for an asset?">
+    Tododeia has a layered fallback strategy:
+
+    1. If `WebSearch` returns no results for an asset, the agent tries `WebFetch` directly on known financial sites (Yahoo Finance, CoinGecko, Google Finance).
+    2. If an agent returns malformed JSON, the orchestrator re-prompts it once with correction instructions.
+    3. If the agent still fails after the retry, that sector is marked as `"data_unavailable": true` in the report rather than being omitted entirely.
+    4. If the Strategy Agent fails, the report falls back to simple confidence-score ranking and notes "Strategy analysis unavailable".
+  </Accordion>
+
+  <Accordion title="Can I add my own sectors or agents?">
+    Yes. Agent behavior is controlled by the prompt templates in **`references/agent-prompts.md`** inside the skill directory. You can:
+
+    - Edit which assets each sector agent prioritizes or always includes
+    - Adjust search queries the agents use for discovery
+    - Modify the recommendation criteria (buy/hold/sell thresholds)
+    - Change how the Strategy Agent weights risk profiles (the multipliers and allocation ranges are defined in the strategy agent prompt)
+
+    To add an entirely new sector, you would need to add a new agent prompt in `references/agent-prompts.md` and update the orchestrator logic in **`SKILL.md`**.
+  </Accordion>
+
+  <Accordion title="What if the dashboard doesn't load?">
+    First, check that the Next.js server is running on port 3420:
+
+    ```bash
+    lsof -i :3420
+    ```
+
+    If nothing is running, re-trigger the analysis (say "run tododeia") — the orchestrator will start the server automatically.
+
+    If port 3420 is in use by another process, stop that process and re-run. If Node.js is not available in your environment, Tododeia will automatically switch to [fallback mode](/reference/fallback-mode) and serve the report via Python on port 8420.
+  </Accordion>
+
+  <Accordion title="How does historical accuracy work on the first run?">
+    On the first run, there is no history to compare against. The `historical_accuracy` block in the report will show:
+
+    ```json
+    {
+      "previous_date": null,
+      "calls_made": 0,
+      "calls_correct": 0,
+      "accuracy_pct": 0,
+      "notable": ""
+    }
+    ```
+
+    After the first run, Tododeia saves a dated history file to **`output/history/`**. On subsequent runs, the Strategy Agent compares its previous recommendations to current prices and calculates how many calls were directionally correct.
+
+    Accuracy tracking improves as more runs accumulate over time.
+  </Accordion>
+
+  <Accordion title="Can I run it without internet?">
+    Tododeia requires an active internet connection for meaningful results — all four sector agents perform live web research.
+
+    If all web searches fail (for example, due to no internet access), Tododeia will still generate a report, but each asset will show `"No data available"` messages. The report structure will be valid JSON, but the content will not reflect real market conditions.
+  </Accordion>
+
+  <Accordion title="How do I stop the dashboard server?">
+    The Next.js dev server runs in the background on port 3420. To stop it, find and kill the process:
+
+    ```bash
+    # Find the process
+    lsof -i :3420
+
+    # Kill it by PID
+    kill <PID>
+    ```
+
+    The dashboard server does not restart automatically unless you trigger another analysis run.
+  </Accordion>
+
+  <Accordion title="What languages are supported?">
+    Tododeia provides **full bilingual support** — English and Spanish.
+
+    After each run, a translation agent automatically creates a Spanish version of the report at **`dashboard/public/data/report-es.json`**. The following fields are translated:
+
+    - Executive summary and strategy summary
+    - Macro environment summary and key factors
+    - Cross-sector insights and implications
+    - Risk warnings
+    - Historical accuracy notable notes
+    - Per sector: sector summary and top pick reasoning
+    - Per asset: reasoning, key news headlines, and social highlights
+
+    Numbers, tickers, prices, dates, percentages, asset names, symbols, URLs, and enum values (like `"bullish"`, `"buy"`, `"high"`) are **not** translated — they remain identical in both files.
+
+    In the dashboard, use the language toggle in the toolbar to switch between English and Spanish at any time.
+  </Accordion>
+
+  <Accordion title="How do I update Tododeia?">
+    If you installed Tododeia by cloning the repository (Option C in the installation guide), update it with:
+
+    ```bash
+    git pull
+    ```
+
+    Run this command inside the `maia-skill` directory. After pulling, reinstall dashboard dependencies if the `package.json` changed:
+
+    ```bash
+    npm install --prefix dashboard
+    ```
+
+    If you installed via the one-liner or the Claude Code plugin, re-run your original install command to get the latest version.
+  </Accordion>
+</AccordionGroup>

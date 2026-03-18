@@ -1,0 +1,174 @@
+---
+title: "Sectors"
+description: "The four market sectors covered by Tododeia's research agents"
+---
+
+Tododeia deploys a dedicated research agent for each of four market sectors. Every agent follows the same two-phase approach: first it discovers which assets to analyze based on current market conditions, then it researches each one in depth. No agent works from a fixed list — discovery happens live at the start of every run.
+
+<Note>
+  All agents must verify prices from at least 2 independent sources before reporting. The `source_agreement` field in every asset record reflects whether those sources agreed: `"high"` (within 1%), `"medium"` (1–3%), or `"low"` (>3% divergence).
+</Note>
+
+<AccordionGroup>
+  <Accordion title="Crypto" icon="bitcoin-sign">
+    The Crypto Agent discovers 5–7 cryptocurrencies worth analyzing right now.
+
+    ### Anchor assets
+
+    The agent always includes **Bitcoin (BTC)** and **Ethereum (ETH)** as market anchors. These two are included regardless of what the discovery phase surfaces, because they serve as reference points for the broader crypto market.
+
+    ### Dynamic discovery
+
+    The agent searches for 3–5 additional assets using queries like:
+
+    - `"best cryptocurrencies to buy {month} {year}"`
+    - `"top trending crypto today"`
+    - `"top crypto gainers this week {month} {year}"`
+    - `"most promising altcoins {year}"`
+    - CoinGecko or CoinMarketCap trending pages
+
+    **Selection criteria:** Assets with a combination of strong momentum, high social buzz, upcoming catalysts, or contrarian value. The agent does not default to the largest market caps — it looks for opportunities.
+
+    ### Sources checked
+
+    - **Prices and news:** CoinGecko, CoinDesk, CoinTelegraph
+    - **Price cross-reference:** Yahoo Finance crypto section
+    - **Social sentiment:** Crypto Twitter/X, Reddit r/cryptocurrency
+
+    ### Recommendation criteria
+
+    | Signal | Recommendation |
+    |--------|----------------|
+    | Strong upward momentum, positive catalysts, undervalued vs. fundamentals, high social buzz confirming trend | **buy** |
+    | Stable with no clear directional signal, mixed social sentiment, waiting for confirmation | **hold** |
+    | Negative momentum, regulatory risks, overbought conditions, social sentiment turning negative | **sell** |
+  </Accordion>
+
+  <Accordion title="Stocks" icon="chart-line">
+    The Stocks Agent discovers 5–8 stocks and market benchmarks to analyze.
+
+    ### Anchor assets
+
+    The agent always includes the **S&P 500 (SPX)** and **NASDAQ Composite (IXIC)** as market benchmarks. These provide context for whether individual stock picks are outperforming or underperforming the broader market.
+
+    ### Dynamic discovery
+
+    The agent searches for 3–6 individual stocks using queries like:
+
+    - `"best stocks to buy {month} {year}"`
+    - `"top performing stocks this week"`
+    - `"analyst top stock picks {month} {year}"`
+    - `"wallstreetbets trending stocks today"`
+    - `"stocks with upcoming catalysts {month} {year}"`
+    - `"undervalued stocks {year}"`
+
+    **Selection criteria:** A mix of large-cap leaders and emerging opportunities, drawn from different sectors (tech, healthcare, energy, finance, etc.). The agent prioritizes stocks with strong momentum, upcoming earnings catalysts, analyst upgrades, or contrarian value — it does not default to tech only.
+
+    ### Sources checked
+
+    - **Prices and analysis:** Yahoo Finance, MarketWatch, CNBC
+    - **Institutional perspective:** Reuters, Bloomberg
+    - **Analyst opinions:** Seeking Alpha
+    - **Retail sentiment:** WallStreetBets/Reddit, Twitter/X financial accounts
+
+    ### Recommendation criteria
+
+    | Signal | Recommendation |
+    |--------|----------------|
+    | Strong earnings, positive guidance, sector tailwinds, attractive valuation, positive retail sentiment confirming institutional view | **buy** |
+    | Fair valuation, stable earnings, no major catalysts, mixed sentiment | **hold** |
+    | Declining fundamentals, overvaluation, sector headwinds, negative social sentiment and analyst downgrades converging | **sell** |
+  </Accordion>
+
+  <Accordion title="Currencies (Forex)" icon="money-bill">
+    The Currencies Agent discovers 5–7 currency pairs and macro monetary themes.
+
+    ### Anchor assets
+
+    The agent always includes the **DXY (US Dollar Index)** as the primary anchor, and **USD/MXN** because of its relevance to the Tododeia community. DXY serves as the baseline for understanding dollar strength across all other pairs.
+
+    ### Dynamic discovery
+
+    The agent searches for 3–5 additional pairs using queries like:
+
+    - `"most volatile currency pairs today"`
+    - `"best forex trades {month} {year}"`
+    - `"currency pairs to watch {month} {year}"`
+    - `"central bank decisions this week"`
+    - `"emerging market currencies {month} {year}"`
+
+    **Selection criteria:** Pairs affected by current central bank decisions, geopolitical events, or strong technical setups. If an emerging market currency is in play due to elections, rate decisions, or a crisis, the agent includes it — it does not default to the standard majors only.
+
+    ### Sources checked
+
+    - **Institutional forex:** Reuters, Bloomberg
+    - **Forex-specific analysis:** ForexLive, FXStreet
+    - **Macro data:** Trading Economics
+    - **Official policy:** Central bank websites (Fed, ECB, BoJ, BoE, Banxico, and others as relevant)
+    - **Market sentiment:** Twitter/X forex traders
+
+    Price cross-referencing for currencies requires sources to agree within **0.1%**. The agent records which sources it checked and their agreement level for every pair.
+
+    ### Recommendation criteria
+
+    | Signal | Recommendation |
+    |--------|----------------|
+    | Currency expected to strengthen — hawkish central bank, strong economic data, positive rate differential | **buy** |
+    | Ranging market, no clear directional bias, central bank on hold | **hold** |
+    | Currency expected to weaken — dovish policy shift, deteriorating economic data | **sell** |
+  </Accordion>
+
+  <Accordion title="Commodities (Materials)" icon="gem">
+    The Materials Agent discovers 5–7 commodities worth analyzing, spanning precious metals, energy, industrial metals, and agricultural products.
+
+    ### Anchor assets
+
+    The agent always includes **Gold (XAU)** and **Crude Oil WTI (CL)** as market anchors. Gold signals safe-haven demand and inflation expectations; Oil WTI reflects energy market dynamics and broad economic activity.
+
+    ### Dynamic discovery
+
+    The agent searches for 3–5 additional commodities using queries like:
+
+    - `"best commodities to invest in {month} {year}"`
+    - `"top performing commodities this month"`
+    - `"commodity trends {year}"`
+    - `"commodities affected by geopolitics {month} {year}"`
+    - `"agricultural commodities outlook {year}"`
+
+    **Selection criteria:** A mix of precious metals, energy, industrial metals, and agricultural commodities when relevant. The agent prioritizes commodities with supply disruptions, geopolitical catalysts, or strong demand trends. If cocoa is surging or lithium is crashing, the agent includes those rather than defaulting to the standard set.
+
+    Prices are reported per standard unit: gold per ounce, oil per barrel, copper per pound, and so on.
+
+    ### Sources checked
+
+    - **Precious metals:** Kitco
+    - **Energy:** OilPrice.com
+    - **Broad commodities:** Reuters commodities section, Trading Economics
+    - **Futures data:** CME Group
+    - **Market sentiment:** Twitter/X commodity traders
+
+    Price cross-referencing for commodities requires sources to agree within **0.5%**.
+
+    ### Recommendation criteria
+
+    | Signal | Recommendation |
+    |--------|----------------|
+    | Supply constraints, increasing demand, inflation hedge, geopolitical risk premium, central bank buying (for gold) | **buy** |
+    | Balanced supply/demand, stable pricing, no clear catalysts | **hold** |
+    | Oversupply, demand destruction, deflationary signals, geopolitical de-escalation | **sell** |
+  </Accordion>
+</AccordionGroup>
+
+## Source cross-referencing requirement
+
+Every sector agent must verify prices from at least 2 different sources before finalizing any asset record. For each asset, the agent records:
+
+- Which sources it checked (`sources_checked` array)
+- Whether the sources agreed (`source_agreement`: `"high"`, `"medium"`, or `"low"`)
+- Any significant discrepancies between sources
+
+If sources disagree significantly, the agent notes the discrepancy in the asset record rather than silently picking one value.
+
+<Tip>
+  You can see which sources each agent checked directly in the dashboard's per-asset detail view. This lets you verify the data provenance for any recommendation.
+</Tip>

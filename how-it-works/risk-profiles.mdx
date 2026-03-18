@@ -1,0 +1,125 @@
+---
+title: "Risk profiles"
+description: "How conservative, moderate, and aggressive profiles affect analysis"
+---
+
+The very first thing Tododeia asks you before running any research is your risk tolerance. Your answer shapes every part of the output: which assets get emphasized, how the Strategy Agent scores them, what position sizes it suggests, and how the portfolio gets allocated across sectors.
+
+<Note>
+  Risk profile is captured in step 1, before any web research begins. The 4 sector agents run knowing your profile, and the Strategy Agent applies it explicitly when scoring and ranking every asset.
+</Note>
+
+## How it works
+
+When you trigger an analysis, the orchestrator presents three options:
+
+1. **Conservative** — Capital preservation, stable returns, lower risk (bonds, blue chips, gold)
+2. **Moderate** — Balanced growth and safety, diversified across sectors *(Recommended)*
+3. **Aggressive** — Maximum growth potential, comfortable with high volatility (crypto, growth stocks, leveraged positions)
+
+Your selection is stored as the `risk_profile` variable and passed directly to the Strategy Agent alongside all 4 sector reports.
+
+## Profile details
+
+<Tabs>
+  <Tab title="Conservative">
+    **Who it's for:** Investors prioritizing capital preservation over growth. You want stable, lower-risk returns and are comfortable accepting lower upside to avoid large drawdowns.
+
+    ### How the Strategy Agent scores assets
+
+    The Strategy Agent applies explicit penalties and boosts based on asset volatility:
+
+    - High-volatility assets are penalized: crypto receives a **−3 score adjustment**, growth stocks receive **−2**
+    - Stable assets are rewarded: gold receives **+2**, blue-chip stocks receive **+1**, and currencies tied to hawkish central banks receive **+1**
+    - The agent favors `hold` and `accumulate` signals over aggressive `buy` signals
+
+    ### Allocation ranges
+
+    The portfolio leans heavily toward stocks and materials (especially gold), with minimal crypto exposure:
+
+    | Sector | Typical range |
+    |--------|---------------|
+    | Stocks | High (blue-chip focus) |
+    | Materials | Elevated (gold as hedge) |
+    | Currencies | Moderate (safe-haven pairs) |
+    | Crypto | Minimal |
+    | Cash | Higher reserve |
+
+    ### Position sizing
+
+    No single high-risk asset should exceed **5% of your portfolio**. The Strategy Agent will flag any pick that approaches this limit in its `warnings` array.
+  </Tab>
+
+  <Tab title="Moderate">
+    **Who it's for:** Investors seeking balanced growth and stability. You want diversification across sectors and are comfortable with moderate volatility in exchange for better long-term returns. This is the recommended profile for most users.
+
+    ### How the Strategy Agent scores assets
+
+    The Strategy Agent applies a light volatility adjustment:
+
+    - Crypto receives a slight penalty: **−1 score adjustment**
+    - All other asset classes are scored at face value
+    - Standard buy/hold/sell thresholds apply without special weighting
+
+    ### Allocation ranges
+
+    The portfolio is diversified across all four sectors with a tilt toward stocks:
+
+    | Sector | Example allocation |
+    |--------|--------------------|
+    | Stocks | ~45% |
+    | Materials | ~20% |
+    | Currencies | ~15% |
+    | Crypto | ~10% |
+    | Cash | ~10% |
+
+    These percentages shift based on the current macro environment. For example, if the Strategy Agent detects elevated geopolitical risk, it may increase the materials allocation and reduce crypto.
+
+    ### Position sizing
+
+    No single asset should exceed **10% of your portfolio**. The `position_size` field on each risk-adjusted pick reflects this constraint.
+  </Tab>
+
+  <Tab title="Aggressive">
+    **Who it's for:** Investors comfortable with high volatility in pursuit of maximum growth. You can tolerate significant short-term losses and are focused on capitalizing on momentum, trends, and high-conviction opportunities.
+
+    ### How the Strategy Agent scores assets
+
+    The Strategy Agent actively rewards momentum and buzz:
+
+    - High-momentum assets (trending up) receive a **+2 score boost**
+    - Assets with high social buzz and strong fundamental thesis are prioritized
+    - The agent is willing to buy into dips when the underlying thesis is intact
+    - No penalties applied to high-volatility assets like crypto
+
+    ### Allocation ranges
+
+    The portfolio can be significantly concentrated in high-growth assets:
+
+    | Sector | Typical range |
+    |--------|---------------|
+    | Stocks | Growth-focused, may include speculative names |
+    | Crypto | Elevated, includes altcoins and trending tokens |
+    | Materials | Reduced unless strong momentum |
+    | Currencies | Reduced unless high-volatility pairs in play |
+    | Cash | Minimal reserve |
+
+    ### Position sizing
+
+    Concentrated positions are permitted. A single asset can be allocated up to **20% of your portfolio** when conviction is high. The `position_size` field on risk-adjusted picks reflects this wider range (e.g., `"15-20% of portfolio"`).
+
+    <Warning>
+      The Strategy Agent will include explicit warnings in the `warnings` array when the aggressive profile leads to high concentration or correlated positions — for example, if multiple top picks would all fall together in a market downturn.
+    </Warning>
+  </Tab>
+</Tabs>
+
+## Risk profile and the report
+
+Your selected profile appears throughout the dashboard:
+
+- The **executive summary** is written specifically for your profile
+- Each **risk-adjusted pick** includes reasoning tied to your profile (a `"buy"` for aggressive is not the same recommendation as a `"buy"` for conservative)
+- The **portfolio allocation** chart reflects profile-specific percentages
+- The **`position_size`** field on every top pick is calibrated to your profile's maximum single-asset limit
+- **Warnings** are surfaced when the strategy detects risks specific to your chosen tolerance

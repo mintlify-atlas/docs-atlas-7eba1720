@@ -1,0 +1,120 @@
+---
+title: "Customizing agent prompts"
+description: "How to modify the research prompts that guide each of the five sector agents."
+---
+
+All five agent prompts live in a single file: **`references/agent-prompts.md`** inside the skill directory. Editing this file is how you control what each agent researches, how it searches, which sources it prefers, and how it scores recommendations.
+
+## What the file contains
+
+The file is divided into five sections — one per agent — each following the same internal structure:
+
+| Section | Purpose |
+|---|---|
+| Asset Discovery (Step 1) | Rules for which assets to always include and how to find more |
+| Research Strategy (Step 2) | The sequence of searches the agent performs |
+| Source Cross-Referencing | Price-verification rules and agreement thresholds |
+| Preferred Sources | Ranked list of sites the agent should prioritize |
+| Output Requirements | The JSON schema the agent must return |
+| Recommendation Criteria | Conditions that trigger a buy, hold, or sell |
+
+<Tip>
+Every search query in the prompts uses `{month}` and `{year}` placeholders that are automatically filled with today's date at runtime. You do not need to update dates manually.
+</Tip>
+
+## Per-agent customization
+
+<AccordionGroup>
+  <Accordion title="Crypto Agent">
+    The Crypto Agent always includes **Bitcoin (BTC)** and **Ethereum (ETH)** as market anchors, then dynamically discovers 3–5 additional assets.
+
+    **What you can change:**
+
+    - **Always-include assets** — Add or swap the anchor assets (e.g., replace ETH with Solana if you prefer a different benchmark).
+    - **Discovery search queries** — The agent runs these searches by default:
+      ```
+      "best cryptocurrencies to buy {month} {year}"
+      "top trending crypto today"
+      "top crypto gainers this week {month} {year}"
+      "most promising altcoins {year}"
+      ```
+      Add, remove, or reword queries to shift the agent's discovery focus.
+    - **Selection criteria** — The agent is instructed to look for "strong momentum, high social buzz, upcoming catalysts, or contrarian value". Update this text to reprioritize (e.g., bias toward DeFi or layer-2 tokens).
+    - **Preferred sources** — Current list: CoinGecko, CoinDesk, CoinTelegraph, Yahoo Finance, Crypto Twitter, Reddit r/cryptocurrency. Add or remove sources here.
+    - **Recommendation thresholds** — The buy/hold/sell criteria are plain English rules. For example, the current buy trigger is: *"Strong upward momentum, positive catalysts, undervalued relative to fundamentals, high social buzz confirming trend."* Tighten or loosen these to change how readily the agent recommends buying.
+    - **Confidence score cutoffs** — The guide uses 8–10 for high conviction, 5–7 for moderate, and 1–4 for low. Adjust the thresholds to suit your tolerance.
+  </Accordion>
+
+  <Accordion title="Stocks Agent">
+    The Stocks Agent always includes **S&P 500 (SPX)** and **NASDAQ Composite (IXIC)** as market benchmarks, then discovers 3–6 individual stocks.
+
+    **What you can change:**
+
+    - **Always-include benchmarks** — Swap SPX/IXIC for other indices if your focus is non-US markets (e.g., FTSE 100, Nikkei 225).
+    - **Discovery search queries** — Defaults include:
+      ```
+      "best stocks to buy {month} {year}"
+      "analyst top stock picks {month} {year}"
+      "wallstreetbets trending stocks today"
+      "stocks with upcoming catalysts {month} {year}"
+      "undervalued stocks {year}"
+      ```
+    - **Sector diversity rule** — The prompt currently instructs the agent to "mix large-cap leaders with emerging opportunities" across tech, healthcare, energy, and finance. Change this to focus on specific sectors.
+    - **Preferred sources** — Current list: Yahoo Finance, MarketWatch, CNBC, Reuters, Bloomberg, Seeking Alpha, WallStreetBets/Reddit, Twitter/X.
+    - **Recommendation thresholds** — Buy is triggered by strong earnings, positive guidance, and sector tailwinds. Hold requires fair valuation and stable earnings. Sell requires declining fundamentals converging with negative analyst sentiment.
+  </Accordion>
+
+  <Accordion title="Currencies Agent">
+    The Currencies Agent always includes **DXY (US Dollar Index)** and **USD/MXN** (included because of the Tododeia community), then discovers 3–5 additional pairs.
+
+    **What you can change:**
+
+    - **Always-include pairs** — Replace or add pairs. If your user base is in Europe, adding EUR/USD as a fixed anchor makes sense.
+    - **Discovery search queries** — Defaults include:
+      ```
+      "most volatile currency pairs today"
+      "best forex trades {month} {year}"
+      "central bank decisions this week"
+      "emerging market currencies {month} {year}"
+      ```
+    - **Selection criteria** — The agent currently prioritizes pairs affected by central bank decisions, geopolitical events, or strong technical setups. Adjust to focus on specific regions or monetary policy themes.
+    - **Preferred sources** — Current list: Reuters, Bloomberg, ForexLive, FXStreet, Trading Economics, central bank websites, Twitter/X forex traders.
+    - **Agreement threshold** — Currency rates must agree within 0.1% across sources. Adjust this in the cross-referencing section if needed.
+    - **Recommendation thresholds** — Buy means the currency is expected to strengthen (hawkish central bank, strong data); sell means it's expected to weaken.
+  </Accordion>
+
+  <Accordion title="Materials Agent">
+    The Materials Agent always includes **Gold (XAU)** and **Crude Oil WTI (CL)** as anchors, then discovers 3–5 additional commodities.
+
+    **What you can change:**
+
+    - **Always-include commodities** — Gold and Oil WTI are the defaults. Swap for Silver and Natural Gas if that better fits your focus.
+    - **Discovery search queries** — Defaults include:
+      ```
+      "best commodities to invest in {month} {year}"
+      "commodity trends {year}"
+      "commodities affected by geopolitics {month} {year}"
+      "agricultural commodities outlook {year}"
+      ```
+      The prompt specifically calls out agricultural softs like cocoa, coffee, and wheat — remove that emphasis if you want to stay focused on metals and energy.
+    - **Mix guidance** — The agent is told to "mix precious metals, energy, industrial metals, and agricultural commodities if relevant". Restrict this to fewer categories if you want a narrower focus.
+    - **Preferred sources** — Current list: Kitco, OilPrice.com, Reuters commodities, Trading Economics, CME Group, Twitter/X commodity traders.
+    - **Agreement threshold** — Commodity prices must agree within 0.5% across sources.
+    - **Recommendation thresholds** — Buy is triggered by supply constraints, inflation hedging, or geopolitical risk premium.
+  </Accordion>
+
+  <Accordion title="Strategy Agent">
+    The Strategy Agent receives all four sector reports and the user's risk profile. It produces cross-sector insights, risk-adjusted picks, and a portfolio allocation.
+
+    **What you can change:**
+
+    - **Macro correlation patterns** — The agent looks for specific patterns like "Gold + Crypto both up → fiat devaluation hedge" and "Oil up + Stocks down → stagflation risk". Add or remove patterns in Step 2 of its prompt.
+    - **Scoring modifiers per risk profile** — See [Customizing risk profiles](/customization/risk-profiles) for the full details.
+    - **Minimum number of top picks** — The prompt currently requires at least 5 risk-adjusted picks. Change this number to get more or fewer picks in the report.
+    - **Historical accuracy behavior** — The accuracy tracking logic is in Step 5. Modify it to change how the agent calibrates confidence based on past performance.
+  </Accordion>
+</AccordionGroup>
+
+<Warning>
+All five agents must return a JSON block that exactly matches the schema defined in SKILL.md Step 4. If you add new fields to a prompt's Output Requirements section, also update the TypeScript types in **`dashboard/src/types/`** and the components that render those fields. Removing required fields will cause the dashboard to display missing data or throw errors.
+</Warning>

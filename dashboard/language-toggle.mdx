@@ -1,0 +1,71 @@
+---
+title: "Language toggle"
+description: Switch the dashboard between English and Spanish, including all report data fields.
+---
+
+The Tododeia dashboard supports full bilingual output — both the UI chrome and the report content switch languages when you toggle. The report data itself is stored in two separate JSON files, one per language, so switching is instantaneous with no re-fetching delay.
+
+## Choosing a language on first open
+
+The first time you open the dashboard, a language picker modal appears:
+
+> **Choose your language / Elige tu idioma**
+
+Select **English** or **Spanish (Español)**. Your choice is saved to `localStorage` under the key `tododeia-lang-v2` and remembered across browser sessions. The picker does not appear again unless you clear your browser storage.
+
+You can switch languages at any time by using the **Language** control in the dashboard toolbar — you are not locked in to your initial selection.
+
+## How the language files work
+
+The skill produces two report files during generation:
+
+| File | Language | Description |
+|------|----------|-----------|
+| `dashboard/public/data/report.json` | English | Primary report written by the orchestrator |
+| `dashboard/public/data/report-es.json` | Spanish | Translated copy written by the Translation Agent |
+
+The `useReportData` hook fetches the correct file based on the active language:
+
+```typescript
+const file = lang === "es" ? "/data/report-es.json" : "/data/report.json"
+```
+
+If `report-es.json` is not found (HTTP 404), the hook falls back to the English `report.json` automatically so the dashboard never shows a blank page.
+
+## Translation Agent (Step 8b)
+
+After writing the English report, the orchestrator spawns a dedicated **Translation Agent**. The agent reads `report.json`, translates the human-readable text fields to Spanish, preserves everything else exactly as-is, and writes the result to `report-es.json`.
+
+The Translation Agent prompt:
+
+> You are a financial translator. Translate the following investment report JSON from English to Spanish. Translate only the human-readable text fields listed. Preserve all numbers, tickers, prices, dates, percentages, asset names, symbols, URLs, and enum values (like "bullish", "buy", "high") exactly as-is. Return valid JSON with the same structure.
+
+## What gets translated
+
+The Translation Agent translates these fields:
+
+- `executive_summary`
+- `strategy_summary`
+- `macro_environment.summary`
+- `macro_environment.key_factors[]`
+- `cross_sector_insights[].insight`
+- `cross_sector_insights[].implication`
+- `warnings[]`
+- `historical_accuracy.notable`
+- Per sector: `sector_summary`, `top_pick_reasoning`
+- Per asset: `reasoning`, `key_news[]`, `social_highlights[]`
+
+## What stays as-is
+
+The following are never translated, in either the JSON or the UI:
+
+- Numbers, prices, and percentages (e.g. `$67,500`, `+3.8%`)
+- Ticker symbols (e.g. `BTC`, `AAPL`, `DXY`)
+- Asset names and full names (e.g. `Bitcoin`, `Apple Inc.`)
+- Dates (e.g. `2026-03-18`)
+- URLs (e.g. source links)
+- Enum values such as `bullish`, `bearish`, `neutral`, `buy`, `hold`, `sell`, `high`, `medium`, `low`
+
+<Tip>
+  If a Spanish translation is missing or the `report-es.json` file does not exist yet, the dashboard automatically falls back to English content rather than showing an error.
+</Tip>

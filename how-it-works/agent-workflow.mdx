@@ -1,0 +1,166 @@
+---
+title: "Agent workflow"
+description: "How the 5 agents coordinate to produce investment research"
+---
+
+Tododeia uses 5 specialized AI agents: 4 sector researchers that run in parallel, and 1 strategy agent that synthesizes their combined output. Each agent has a distinct role, a defined output schema, and clear error-handling rules.
+
+## Parallelism and sequencing
+
+The 4 sector agents launch simultaneously in a single orchestrator message. This means research across crypto, stocks, currencies, and commodities happens concurrently — the total research time is bounded by the slowest agent, not the sum of all four.
+
+The Strategy Agent launches only after all 4 sector agents have returned their results. It receives every sector report at once and performs cross-sector analysis that no individual sector agent can do on its own.
+
+```text
+Step 4: ┌─────────┐ ┌─────────┐ ┌─────────────┐ ┌──────────┐
+        │ Crypto  │ │ Stocks  │ │  Currencies │ │Materials │  ← parallel
+        └────┬────┘ └────┬────┘ └──────┬──────┘ └────┬─────┘
+             │           │             │              │
+             └───────────┴─────────────┴──────────────┘
+                                   │
+                                   ▼
+Step 5:                   ┌─────────────────┐
+                          │ Strategy Agent  │  ← sequential
+                          └─────────────────┘
+```
+
+## The 4 sector agents
+
+<Columns cols={2}>
+  <Card title="Crypto Agent" icon="bitcoin-sign">
+    Discovers 5–7 cryptocurrencies worth analyzing right now. Always anchors on Bitcoin (BTC) and Ethereum (ETH), then dynamically finds trending altcoins, DeFi tokens, and AI tokens based on live web searches. Checks CoinGecko, CoinDesk, CoinTelegraph, Yahoo Finance, crypto Twitter/X, and Reddit r/cryptocurrency.
+  </Card>
+  <Card title="Stocks Agent" icon="chart-line">
+    Discovers 5–8 stocks to analyze. Always includes the S&P 500 (SPX) and NASDAQ Composite (IXIC) as benchmarks, then finds individual stocks with strong momentum, upcoming earnings catalysts, analyst upgrades, or contrarian value. Sources include Yahoo Finance, MarketWatch, CNBC, Reuters, Bloomberg, Seeking Alpha, and WallStreetBets.
+  </Card>
+  <Card title="Currencies Agent" icon="dollar-sign">
+    Discovers 5–7 currency pairs and macro monetary themes. Always anchors on DXY (US Dollar Index) and USD/MXN, then finds pairs affected by current central bank decisions, geopolitical events, or strong technical setups. Sources include Reuters, Bloomberg, ForexLive, FXStreet, Trading Economics, and central bank websites.
+  </Card>
+  <Card title="Materials Agent" icon="gem">
+    Discovers 5–7 commodities worth analyzing. Always includes Gold (XAU) and Crude Oil WTI (CL), then finds trending commodities including agricultural softs if relevant (cocoa, coffee, wheat). Sources include Kitco, OilPrice.com, Reuters commodities, Trading Economics, and CME Group.
+  </Card>
+</Columns>
+
+## Sector agent output schema
+
+Every sector agent must return a JSON block in this exact structure:
+
+```json
+{
+  "sector": "crypto|stocks|currencies|materials",
+  "timestamp": "ISO 8601 date-time",
+  "assets": [
+    {
+      "name": "Full Name",
+      "symbol": "TICKER",
+      "current_price": "$XX,XXX.XX",
+      "change_24h": "+X.X%",
+      "change_7d": "+X.X%",
+      "change_30d": "+X.X%",
+      "ytd_change": "+X.X%",
+      "week_52_high": "$XX,XXX.XX",
+      "week_52_low": "$XX,XXX.XX",
+      "market_cap": "$X.XT",
+      "volume_24h": "$X.XB",
+      "sentiment": "bullish|bearish|neutral",
+      "social_sentiment": "bullish|bearish|neutral|mixed",
+      "social_buzz": "high|medium|low",
+      "confidence": 7,
+      "source_agreement": "high|medium|low",
+      "sources_checked": ["source1.com", "source2.com"],
+      "key_news": ["headline 1", "headline 2"],
+      "social_highlights": ["tweet/post 1", "tweet/post 2"],
+      "recommendation": "buy|hold|sell",
+      "reasoning": "1-2 sentence explanation"
+    }
+  ],
+  "sector_summary": "2-3 sentence overview of the sector",
+  "sector_outlook": "bullish|bearish|neutral",
+  "top_pick": "TICKER",
+  "top_pick_reasoning": "Why this is the best opportunity in this sector"
+}
+```
+
+<Note>
+  Each sector agent must verify prices from at least 2 independent sources before reporting. `source_agreement` reflects how closely those sources agree: `"high"` means within 1%, `"medium"` within 1–3%, and `"low"` means sources diverge by more than 3%.
+</Note>
+
+## The Strategy Agent
+
+The Strategy Agent acts as the Chief Investment Strategist. It receives all 4 sector reports, your risk profile, and any historical data from prior runs. It does not re-research prices — its value is in synthesis.
+
+Its analysis framework covers five steps:
+
+1. **Macro environment assessment** — reads interest rate direction, inflation signals, risk appetite, and geopolitical risk across all 4 sector reports.
+2. **Cross-sector correlation analysis** — identifies meaningful patterns (e.g., gold and crypto both rising suggests fiat devaluation hedging; oil up with stocks down signals stagflation risk).
+3. **Risk-adjusted ranking** — scores every asset with volatility adjustments that depend on your risk profile, then ranks them.
+4. **Portfolio allocation** — distributes a hypothetical portfolio across sectors and cash, totaling 100%.
+5. **Historical accuracy check** — if prior reports exist, compares previous buy/sell calls to current prices and calculates a directional accuracy percentage.
+
+### Strategy Agent output schema
+
+```json
+{
+  "risk_profile": "conservative|moderate|aggressive",
+  "macro_environment": {
+    "summary": "2-3 sentence macro overview (rates, inflation, geopolitics)",
+    "interest_rate_outlook": "rising|stable|falling",
+    "inflation_outlook": "rising|stable|falling",
+    "geopolitical_risk": "high|medium|low",
+    "key_factors": ["factor 1", "factor 2", "factor 3"]
+  },
+  "portfolio_allocation": {
+    "crypto": 10,
+    "stocks": 45,
+    "currencies": 15,
+    "materials": 20,
+    "cash": 10
+  },
+  "cross_sector_insights": [
+    {
+      "insight": "Gold and crypto are both rallying — unusual correlation suggests...",
+      "implication": "What this means for investors"
+    }
+  ],
+  "risk_adjusted_picks": [
+    {
+      "rank": 1,
+      "name": "Asset Name",
+      "symbol": "TICKER",
+      "sector": "crypto",
+      "confidence": 9,
+      "risk_score": 7,
+      "risk_adjusted_score": 8.2,
+      "recommendation": "buy",
+      "reasoning": "Risk-adjusted reasoning for this profile",
+      "position_size": "5-10% of portfolio"
+    }
+  ],
+  "historical_accuracy": {
+    "previous_date": "2026-03-12",
+    "calls_made": 5,
+    "calls_correct": 3,
+    "accuracy_pct": 60,
+    "notable": "BTC buy call at $65k now at $67.5k (+3.8%)"
+  },
+  "warnings": ["Any risk warnings or cautions"],
+  "strategy_summary": "3-4 sentence strategy overview tailored to risk profile"
+}
+```
+
+The Strategy Agent must produce at least 5 risk-adjusted picks. The `risk_adjusted_score` combines the raw confidence score with a volatility penalty or boost that depends on your risk profile.
+
+## Error handling
+
+| Situation | Behavior |
+|-----------|----------|
+| `WebSearch` returns no results for an asset | Retry with `WebFetch` on Yahoo Finance, CoinGecko, or Google Finance |
+| Sector agent returns malformed JSON | Re-prompt once with correction instructions; if it fails again, mark the sector as `"data_unavailable": true` |
+| Strategy Agent fails entirely | Fall back to simple confidence-score ranking and note "Strategy analysis unavailable" in the report |
+| Python not available to serve fallback HTML | Try `npx serve output -p PORT` or instruct you to open `output/report.html` directly |
+| All web searches fail | Generate the report with "No data available" messages rather than crashing |
+| Historical data files are corrupted | Skip accuracy tracking and start fresh |
+
+<Tip>
+  The `data_unavailable` flag on `SectorData` is surfaced in the dashboard so you can tell at a glance if a sector's data is missing rather than seeing empty or stale numbers.
+</Tip>

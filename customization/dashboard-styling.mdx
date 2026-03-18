@@ -1,0 +1,107 @@
+---
+title: "Dashboard styling"
+description: "How to customize the look and feel of the Next.js dashboard."
+---
+
+The dashboard is a Next.js application that uses **Tailwind CSS v4** for styling. All visual customization happens by editing component files — no build configuration changes are needed for style changes.
+
+## Tech stack
+
+The dashboard's dependencies are defined in **`dashboard/package.json`**:
+
+```json
+{
+  "dependencies": {
+    "next": "16.1.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "recharts": "^3.8.0",
+    "framer-motion": "^12.36.0",
+    "shadcn": "^4.0.6",
+    "@base-ui/react": "^1.3.0",
+    "lucide-react": "^0.577.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.5.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^4"
+  }
+}
+```
+
+## Component location
+
+All report UI components live in **`dashboard/src/components/report/`**. Each file corresponds to a distinct section of the dashboard:
+
+| File | Section rendered |
+|---|---|
+| `ReportHeader.tsx` | Branding header with title and risk profile badge |
+| `Toolbar.tsx` | Filter bar, search input, language toggle, print button |
+| `ExecutiveSummary.tsx` | Strategy agent's executive summary text |
+| `MacroEnvironment.tsx` | Rates, inflation, and geo-risk indicators |
+| `PortfolioAllocation.tsx` | Recommended allocation percentages |
+| `CrossSectorInsights.tsx` | Cross-sector correlation insights |
+| `TopPicksGrid.tsx` | Risk-adjusted top picks cards |
+| `PickCard.tsx` | Individual pick card (used by TopPicksGrid) |
+| `SectorOverview.tsx` | Per-sector summary panels |
+| `DetailedAnalysis.tsx` | Expandable per-asset breakdown |
+| `ChartsSection.tsx` | Recharts visualizations (allocation, risk vs. score, buzz) |
+| `HistoricalAccuracy.tsx` | Past accuracy tracking panel |
+| `Warnings.tsx` | Risk warning banners |
+| `Disclaimer.tsx` | Legal disclaimer footer text |
+| `Footer.tsx` | Page footer with tagline and generated timestamp |
+| `LanguagePicker.tsx` | Language selection modal |
+| `LoadingSkeleton.tsx` | Loading state placeholder |
+
+## Making style changes
+
+<Steps>
+  <Step title="Locate the component">
+    Open **`dashboard/src/components/report/`** and identify which file renders the section you want to change. For example, to restyle the top picks cards, open `PickCard.tsx`.
+  </Step>
+
+  <Step title="Edit Tailwind classes">
+    All styling is done with Tailwind utility classes directly on JSX elements. Change, add, or remove classes to adjust colors, spacing, typography, borders, and layout.
+
+    For example, to change the background of the executive summary section, find the relevant `div` in `ExecutiveSummary.tsx` and update its `className`:
+
+    ```typescript
+    // Before
+    <div className="rounded-xl bg-zinc-900 p-6">
+
+    // After
+    <div className="rounded-xl bg-slate-800 p-6">
+    ```
+
+    The dashboard uses `tailwind-merge` (via the `cn()` utility) to handle class conflicts safely, so you can override classes without worrying about specificity issues.
+  </Step>
+
+  <Step title="Restart the dev server">
+    Start the development server to preview your changes:
+
+    ```bash
+    npm run dev --prefix dashboard -- -p 3420
+    ```
+
+    Open `http://localhost:3420` in your browser. Tailwind v4 hot-reloads style changes without a full restart.
+  </Step>
+</Steps>
+
+<Note>
+The dashboard reads its data from **`dashboard/public/data/report.json`** (and `report-es.json` for Spanish). This file is regenerated each time you run the investment analysis skill. Your component files in `dashboard/src/components/report/` are never overwritten by the skill — only the data files change.
+</Note>
+
+## Chart customization
+
+Charts are built with **Recharts v3** and rendered in `ChartsSection.tsx`. The dashboard includes three charts:
+
+- **Sector Confidence** — bar chart of average confidence scores per sector
+- **Risk vs. Score** — scatter plot of risk score against risk-adjusted score per asset
+- **Portfolio Allocation** — pie chart of the recommended allocation percentages
+- **Social Buzz** — bar chart of social buzz levels across top picks
+
+To change chart colors, find the `fill` or `stroke` props on the Recharts components inside `ChartsSection.tsx` and update the hex values or Tailwind CSS variables.
+
+## Animation
+
+The dashboard uses **Framer Motion** for entrance animations on cards and panels. To disable animations, remove the `motion.div` wrappers and replace them with plain `div` elements. To adjust animation speed or easing, change the `transition` props on the motion components.

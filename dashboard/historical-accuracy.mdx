@@ -1,0 +1,70 @@
+---
+title: "Historical accuracy"
+description: How Tododeia tracks past recommendation performance and displays it in the dashboard.
+---
+
+Tododeia records every report it generates and compares previous buy/sell calls to current prices when it runs again. Over time this builds a track record you can inspect directly in the dashboard.
+
+## How history files work
+
+At the end of each analysis run, the orchestrator saves the full report to:
+
+```
+output/history/YYYY-MM-DD.json
+```
+
+The filename uses today's date (e.g. `2026-03-18.json`). The skill keeps the **last 30 files** and deletes older ones automatically to prevent unbounded disk growth.
+
+## What the Strategy Agent measures
+
+When the Strategy Agent runs, it receives the most recent history file alongside the fresh sector data. It compares the previous report's `recommendation` values (`buy` / `sell`) against each asset's current price and determines whether the call was correct.
+
+The result is recorded in the `historical_accuracy` field of the new report:
+
+```json
+{
+  "historical_accuracy": {
+    "previous_date": "2026-03-12",
+    "calls_made": 5,
+    "calls_correct": 3,
+    "accuracy_pct": 60,
+    "notable": "BTC buy call at $65k now at $67.5k (+3.8%)"
+  }
+}
+```
+
+### HistoricalAccuracy fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `previous_date` | `string \| null` | Date of the report that was compared, in `YYYY-MM-DD` format. `null` on the first run. |
+| `calls_made` | `number` | Total number of buy or sell calls evaluated from the previous report |
+| `calls_correct` | `number` | Number of calls that moved in the predicted direction |
+| `accuracy_pct` | `number` | `calls_correct / calls_made × 100`, rounded to the nearest integer |
+| `notable` | `string` | A plain-language highlight of the best or most interesting call from the previous report |
+
+## First run behavior
+
+On your first analysis run there is no prior history to compare against. The Strategy Agent sets `previous_date` to `null` and the dashboard shows:
+
+> No historical data yet. Accuracy tracking begins after your second report.
+
+After your second run, the accuracy section populates automatically.
+
+## What the dashboard displays
+
+The **Historical accuracy** section in the dashboard (labeled **Tracking** in the toolbar) shows:
+
+- **Accuracy percentage** — large, prominent number (e.g. `60%`)
+- **Calls made** — total predictions evaluated
+- **Correct** — how many were right
+- **Since** — the `previous_date` the comparison was made against
+- **Notable** — the highlighted call from the prior report, translated if you are viewing in Spanish
+
+<Tip>
+  The `notable` field is one of the translated fields. When you switch to Spanish, the Strategy Agent's description of the best call appears in Spanish via the Translation Agent.
+</Tip>
+
+<Note>
+  If a history file is corrupted or unreadable, the skill skips accuracy tracking for that run and starts fresh rather than failing the entire analysis.
+</Note>

@@ -1,0 +1,103 @@
+---
+title: 'Installation'
+description: 'Three ways to install Tododeia into Claude Code.'
+---
+
+## Requirements
+
+Before installing, confirm you have:
+- **Claude Code CLI** — [installation guide](https://docs.anthropic.com/en/docs/claude-code)
+- **Node.js 18+** — required for the interactive Next.js dashboard
+- **Internet connection** — agents perform live web research on every run
+
+## Install methods
+
+<Tabs>
+  <Tab title="Option A: One-liner curl">
+    The fastest way to get started. Run this command in your terminal:
+
+    ```bash
+    curl -sL https://raw.githubusercontent.com/Hainrixz/maia-skill/main/install.sh | bash
+    ```
+
+    The installer:
+    1. Clones the repository to `~/.claude/plugins/maia-skill`
+    2. Creates a symlink at `~/.claude/skills/investment-analysis`
+    3. Runs `npm install` for the dashboard (if Node.js is available)
+
+    If Node.js is not found, the installer skips the dashboard step and prints a notice. You can install Node.js later and re-run the installer — it will detect the existing installation and update it instead.
+
+    <Note>
+      Re-running the installer on an already-installed skill performs a `git pull` update instead of a fresh clone.
+    </Note>
+  </Tab>
+
+  <Tab title="Option B: Claude Code plugin">
+    If you prefer using the Claude Code plugin system:
+
+    ```bash
+    claude plugin install Hainrixz/maia-skill
+    ```
+
+    This uses Claude Code's built-in plugin management to fetch and register the skill.
+  </Tab>
+
+  <Tab title="Option C: Manual setup">
+    If you need full control over where files are placed, set up the skill manually:
+
+    ```bash
+    # 1. Clone the repo
+    git clone https://github.com/Hainrixz/maia-skill.git
+
+    # 2. Symlink skill into Claude Code
+    mkdir -p ~/.claude/skills
+    ln -s "$(pwd)/maia-skill/.claude/skills/investment-analysis" ~/.claude/skills/investment-analysis
+
+    # 3. Install dashboard dependencies
+    npm install --prefix maia-skill/dashboard
+    ```
+
+    Each step is independent — you can clone to any directory, adjust the symlink target accordingly.
+  </Tab>
+</Tabs>
+
+## Project structure
+
+After installation, the skill lives at `~/.claude/skills/investment-analysis/` with this layout:
+
+```
+.claude/skills/investment-analysis/
+  SKILL.md                  # Skill definition (orchestrator instructions)
+  assets/
+    template.html           # Fallback HTML report (no Node.js required)
+  references/
+    agent-prompts.md        # Prompts for all 5 agents
+  dashboard/                # Next.js interactive dashboard
+    src/
+      app/                  # App router pages
+      components/           # Report UI components
+      hooks/                # Language and data hooks
+      lib/                  # Translations, constants
+      types/                # TypeScript types
+    public/data/            # Generated report JSON (created at runtime)
+```
+
+## Verify the installation
+
+Open Claude Code and type:
+
+```
+Run tododeia
+```
+
+Claude should ask for your risk profile. If nothing happens, confirm that `~/.claude/skills/investment-analysis/SKILL.md` exists.
+
+## Fallback mode
+
+If Node.js is not available, Tododeia falls back to generating a standalone `output/report.html` file using the HTML template in `assets/`. The report is served via Python's built-in HTTP server on port 8420 instead of the Next.js dashboard on port 3420.
+
+## Uninstall
+
+```bash
+rm -rf ~/.claude/skills/investment-analysis ~/.claude/plugins/maia-skill
+```

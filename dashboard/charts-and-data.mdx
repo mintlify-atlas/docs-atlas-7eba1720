@@ -1,0 +1,96 @@
+---
+title: "Charts and data"
+description: Understanding the charts, data panels, and metrics displayed in the Tododeia dashboard.
+---
+
+The dashboard surfaces two types of visualizations — charts built with Recharts and structured data tables — alongside detailed per-asset panels. This page explains what each metric means and how to read it.
+
+## Charts
+
+### Portfolio allocation chart
+
+A donut or bar chart showing the Strategy Agent's recommended percentage split across sectors. The exact percentages depend on your risk profile:
+
+- **Conservative** — higher cash and materials allocation, lower crypto
+- **Moderate** — balanced across all sectors
+- **Aggressive** — higher crypto and growth stock allocation, minimal cash
+
+The allocation is expressed as whole-number percentages that sum to 100, covering `crypto`, `stocks`, `currencies`, `materials`, and `cash`.
+
+### Risk vs. confidence visualization
+
+A scatter plot where each data point represents a risk-adjusted top pick. The X axis shows the **risk score** and the Y axis shows the **adjusted score**. Points in the upper-left quadrant (low risk, high adjusted score) are the most favorable positions given your profile.
+
+The chart also displays **sector confidence** bars and **social buzz** breakdowns per sector.
+
+## Per-asset data
+
+Each asset inside an expandable sector panel exposes the full set of fields from the `Asset` TypeScript interface. These are organized below by category.
+
+<AccordionGroup>
+  <Accordion title="Price data">
+    | Field | Description |
+    |-------|-------------|
+    | `current_price` | Most recent price at time of research, formatted as a string (e.g. `"$67,500.00"`) |
+    | `change_24h` | Price change over the past 24 hours as a signed percentage (e.g. `"+2.3%"`) |
+    | `change_7d` | Price change over the past 7 days |
+    | `change_30d` | Price change over the past 30 days |
+    | `ytd_change` | Year-to-date price change |
+    | `week_52_high` | Highest price in the trailing 52-week window |
+    | `week_52_low` | Lowest price in the trailing 52-week window |
+    | `market_cap` | Total market capitalisation, formatted (e.g. `"$1.3T"`) |
+    | `volume_24h` | 24-hour trading volume, formatted (e.g. `"$42.1B"`) |
+  </Accordion>
+
+  <Accordion title="Sentiment">
+    | Field | Values | Description |
+    |-------|--------|-------------|
+    | `sentiment` | `bullish` \| `bearish` \| `neutral` | Overall market sentiment for this asset |
+    | `social_sentiment` | `bullish` \| `bearish` \| `neutral` \| `mixed` | Sentiment derived from social media posts |
+    | `social_buzz` | `high` \| `medium` \| `low` | Volume of social media discussion relative to normal levels |
+    | `social_highlights` | `string[]` | Specific tweets, Reddit posts, or social media excerpts collected by the agent |
+  </Accordion>
+
+  <Accordion title="Confidence and source agreement">
+    **Confidence score** (`confidence`) is an integer from 1 to 10 assigned by the sector agent:
+
+    | Range | Meaning |
+    |-------|---------|
+    | 8–10 | Very strong conviction — multiple sources agree, strong momentum |
+    | 5–7 | Moderate conviction — mixed signals or limited data |
+    | 1–4 | Low conviction — conflicting data or high uncertainty |
+
+    **Source agreement** (`source_agreement`) describes how closely the prices or signals from different sources matched:
+
+    | Value | Meaning |
+    |-------|---------|
+    | `high` | Sources are within 1% of each other |
+    | `medium` | Sources differ by 1–3% |
+    | `low` | Sources differ by more than 3% |
+
+    `sources_checked` lists the domains the agent consulted when gathering data for this asset.
+  </Accordion>
+
+  <Accordion title="News and recommendation">
+    | Field | Description |
+    |-------|-------------|
+    | `key_news` | Array of recent news headlines relevant to this asset |
+    | `recommendation` | Agent's signal: `buy`, `hold`, or `sell` |
+    | `reasoning` | 1–2 sentence explanation of the recommendation, written in plain language |
+  </Accordion>
+</AccordionGroup>
+
+## Sector-level data
+
+Each sector panel also shows aggregate fields from the `SectorData` interface:
+
+| Field | Description |
+|-------|-------------|
+| `sector_summary` | 2–3 sentence overview of the sector's current conditions |
+| `sector_outlook` | `bullish`, `bearish`, or `neutral` outlook for the sector |
+| `top_pick` | Ticker symbol of the sector agent's single best opportunity |
+| `top_pick_reasoning` | Explanation of why this asset was chosen as the top pick |
+
+<Note>
+  If a sector agent failed to return data, the panel shows a **Data unavailable** message and the `data_unavailable` flag is set to `true` on the sector object.
+</Note>

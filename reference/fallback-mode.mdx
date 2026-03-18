@@ -1,0 +1,99 @@
+---
+title: 'Fallback mode'
+description: 'What happens when Node.js is not available and how the Python HTTP server fallback works.'
+---
+
+Tododeia has two serving modes depending on whether Node.js is available in your environment.
+
+<Tabs>
+  <Tab title="Primary mode">
+    **Requires**: Node.js 18+
+
+    The primary mode serves an interactive Next.js dashboard. This is the default path when **`dashboard/package.json`** is present.
+
+    **URL**: http://localhost:3420
+
+    Features available in primary mode:
+    - Interactive charts (portfolio allocation, risk vs. confidence)
+    - Expandable sector panels with per-asset detail
+    - English / Spanish language toggle
+    - Historical accuracy tracking display
+    - Risk warnings panel
+    - Top picks grid with confidence scores and position sizing
+
+    The dashboard auto-detects changes to **`dashboard/public/data/report.json`**. Refresh the page after each run to load the latest report.
+  </Tab>
+  <Tab title="Fallback mode">
+    **Requires**: Python 3 (standard library only)
+
+    The fallback mode generates a standalone HTML file and serves it with Python's built-in HTTP server. This path activates when **`dashboard/package.json`** is not found.
+
+    **URL**: http://localhost:8420/report.html
+
+    The fallback report contains all report data but without the interactive Next.js features.
+  </Tab>
+</Tabs>
+
+## Fallback flow
+
+When `dashboard/package.json` is not present, Tododeia follows this sequence:
+
+<Steps>
+  <Step title="Detect missing dashboard">
+    Tododeia checks for **`dashboard/package.json`**. If it does not exist, it switches to the fallback path.
+  </Step>
+  <Step title="Load the HTML template">
+    Tododeia reads **`assets/template.html`** from the skill directory (located via Glob search).
+  </Step>
+  <Step title="Inject report data">
+    The placeholder token `{{REPORT_DATA_JSON}}` in the template is replaced with the serialized `REPORT_DATA` JSON object.
+  </Step>
+  <Step title="Write the report file">
+    The populated HTML is written to **`output/report.html`**. The `output/` directory is created if it does not exist.
+  </Step>
+  <Step title="Find an available port">
+    Tododeia checks whether port **8420** is in use. If it is, it tries ports **8421** through **8425** in order until it finds an available one.
+  </Step>
+  <Step title="Start the HTTP server">
+    The server is started in the background:
+
+    ```bash
+    python3 -m http.server PORT --directory output
+    ```
+  </Step>
+  <Step title="Open the report">
+    You are told to open:
+
+    ```
+    http://localhost:PORT/report.html
+    ```
+  </Step>
+</Steps>
+
+## Error handling
+
+If Python is also unavailable, Tododeia falls back further:
+
+<Steps>
+  <Step title="Try npx serve">
+    Tododeia attempts:
+
+    ```bash
+    npx serve output -p PORT
+    ```
+  </Step>
+  <Step title="Manual open">
+    If `npx serve` also fails, you are instructed to open **`output/report.html`** directly in your browser (using **File > Open** or dragging the file into a browser window).
+  </Step>
+</Steps>
+
+<Warning>
+  The fallback HTML report is a static file. It does not auto-update when a new report is generated — you must reload the page or reopen the file after each run.
+</Warning>
+
+## Port reference
+
+| Mode | Primary port | Fallback ports |
+|------|-------------|----------------|
+| Primary (Next.js) | 3420 | — |
+| Fallback (Python) | 8420 | 8421–8425 |
