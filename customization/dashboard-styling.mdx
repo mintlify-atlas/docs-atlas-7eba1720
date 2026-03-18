@@ -63,14 +63,14 @@ All report UI components live in **`dashboard/src/components/report/`**. Each fi
   <Step title="Edit Tailwind classes">
     All styling is done with Tailwind utility classes directly on JSX elements. Change, add, or remove classes to adjust colors, spacing, typography, borders, and layout.
 
-    For example, to change the background of the executive summary section, find the relevant `div` in `ExecutiveSummary.tsx` and update its `className`:
+    For example, to change the background of the executive summary section, find the relevant element in `ExecutiveSummary.tsx` and update its `className`:
 
     ```typescript
     // Before
-    <div className="rounded-xl bg-zinc-900 p-6">
+    <motion.section className="rounded-xl border border-[#E6E6E4] bg-[#FCFCFB] p-6">
 
-    // After
-    <div className="rounded-xl bg-slate-800 p-6">
+    // After — warm off-white background
+    <motion.section className="rounded-xl border border-[#E6E6E4] bg-[#FFF8F0] p-6">
     ```
 
     The dashboard uses `tailwind-merge` (via the `cn()` utility) to handle class conflicts safely, so you can override classes without worrying about specificity issues.
@@ -93,12 +93,12 @@ The dashboard reads its data from **`dashboard/public/data/report.json`** (and `
 
 ## Chart customization
 
-Charts are built with **Recharts v3** and rendered in `ChartsSection.tsx`. The dashboard includes three charts:
+Charts are built with **Recharts v3** and rendered in `ChartsSection.tsx`. The dashboard includes four charts rendered in a 2×2 grid:
 
-- **Sector Confidence** — bar chart of average confidence scores per sector
-- **Risk vs. Score** — scatter plot of risk score against risk-adjusted score per asset
-- **Portfolio Allocation** — pie chart of the recommended allocation percentages
-- **Social Buzz** — bar chart of social buzz levels across top picks
+- **Sector Confidence** — radar chart of average confidence scores per sector
+- **Risk vs. Score** — bubble scatter chart of risk score against risk-adjusted score per pick
+- **Portfolio Allocation** — doughnut (ring) pie chart of the recommended allocation percentages
+- **Social Buzz** — bar chart of average social buzz levels per sector
 
 To change chart colors, find the `fill` or `stroke` props on the Recharts components inside `ChartsSection.tsx` and update the hex values or Tailwind CSS variables.
 

@@ -7,21 +7,27 @@ The dashboard surfaces two types of visualizations — charts built with Rechart
 
 ## Charts
 
-### Portfolio allocation chart
+The dashboard renders four Recharts visualizations in a 2×2 grid, each showing a different dimension of the analysis.
 
-A donut or bar chart showing the Strategy Agent's recommended percentage split across sectors. The exact percentages depend on your risk profile:
+### Sector confidence radar
+
+A radar chart showing the average confidence score per sector (0–10 scale). Each axis represents one of the four sectors — Cryptocurrency, Stock Market, Forex & Currencies, Commodities & Materials. The filled polygon shows how confident the sector agents were across all assets they researched.
+
+### Risk vs. score scatter plot
+
+A bubble scatter chart where each point represents a risk-adjusted top pick. The X axis shows the **risk score** (1–10, where 10 = highest risk) and the Y axis shows the **adjusted score**. Bubble size reflects the raw confidence score. Points in the upper-left quadrant (low risk, high adjusted score) are the most favorable for your profile. Each pick is colored by its sector using the sector color palette from `constants.ts`.
+
+### Portfolio allocation doughnut
+
+A doughnut (ring) pie chart showing the Strategy Agent's recommended percentage split across sectors. Each slice represents one sector: `crypto`, `stocks`, `currencies`, `materials`, and `cash`. The percentages are whole numbers that sum to 100 and vary based on your risk profile:
 
 - **Conservative** — higher cash and materials allocation, lower crypto
 - **Moderate** — balanced across all sectors
 - **Aggressive** — higher crypto and growth stock allocation, minimal cash
 
-The allocation is expressed as whole-number percentages that sum to 100, covering `crypto`, `stocks`, `currencies`, `materials`, and `cash`.
+### Social buzz bar chart
 
-### Risk vs. confidence visualization
-
-A scatter plot where each data point represents a risk-adjusted top pick. The X axis shows the **risk score** and the Y axis shows the **adjusted score**. Points in the upper-left quadrant (low risk, high adjusted score) are the most favorable positions given your profile.
-
-The chart also displays **sector confidence** bars and **social buzz** breakdowns per sector.
+A bar chart showing the average social buzz level per sector. Buzz is aggregated from the `social_buzz` field on each asset (`"high"` = 3, `"medium"` = 2, `"low"` = 1) and averaged across assets in the sector. The Y axis uses labels Low / Med / High. Each bar is colored by sector.
 
 ## Per-asset data
 
